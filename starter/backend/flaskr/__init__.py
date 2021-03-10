@@ -42,7 +42,7 @@ def create_app(test_config=None):
     CORS(app)
 
     '''
-    @TODO: Use the after_request decorator to set Access-Control-Allow
+    after_request decorator to set Access-Control-Allow
     '''
     @app.after_request
     def after_request(response):
@@ -53,8 +53,7 @@ def create_app(test_config=None):
 #--------Endpoints--------------------------------------------------------------
 
     '''
-    @TODO:
-    Create an endpoint to handle GET requests for questions,
+    Endpoint to handle GET requests for questions,
     including pagination (every 10 questions).
     This endpoint should return a list of questions,
     number of total questions, current category, categories.
@@ -66,8 +65,7 @@ def create_app(test_config=None):
 
     '''
     '''
-    @TODO:
-    Create a POST endpoint to get questions based on a search term.
+    POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
 
@@ -111,8 +109,7 @@ def create_app(test_config=None):
 
 
     '''
-    @TODO:
-    Create an endpoint to handle GET requests
+    Endpoint to handle GET requests
     for all available categories.
     '''
     @app.route('/categories', methods = ['GET'])
@@ -127,8 +124,7 @@ def create_app(test_config=None):
         })
 
     '''
-    @TODO:
-    Create a GET endpoint to get questions based on category.
+    GET endpoint to get questions based on category.
 
     TEST: In the "List" tab / main screen, clicking on one of the
     categories in the left column will cause only questions of that
@@ -152,8 +148,7 @@ def create_app(test_config=None):
 
 
     '''
-    @TODO:
-    Create an endpoint to POST a new question,
+    Endpoint to POST a new question,
     which will require the question and answer text,
     category, and difficulty score.
 
@@ -213,8 +208,7 @@ def create_app(test_config=None):
             })
 
         '''
-        @TODO:
-        Create a POST endpoint to get questions to play the quiz.
+        POST endpoint to get questions to play the quiz.
         This endpoint should take category and previous question parameters
         and return a random questions within the given category,
         if provided, and that is not one of the previous questions.
@@ -261,5 +255,41 @@ def create_app(test_config=None):
             })
 
 #-----------Error Handlers------------------------------------------------------
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+        'success': False,
+        'error': 404,
+        'message': "resource not found"
+        }), 404
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+        'success': False,
+        'error': 422,
+        'message': "unprocessable entity"
+        }), 422
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+        'success': False,
+        'error': 400,
+        'message': "bad request"
+        }), 400
 
+    @app.errorhandler(405)
+    def not_allowed(error):
+        return jsonify({
+        'success': False,
+        'error': 405,
+        'message': "method not allowed"
+        }), 405
+    @app.errorhandler(500)
+    def server_error(error):
+        return jsonify({
+        'success': False,
+        'error': 500,
+        'message': "internal server error"
+        }), 500
+        
     return app
