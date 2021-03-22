@@ -231,28 +231,34 @@ def create_app(test_config=None):
                 question = random.choice(questions)
             elif quiz_category['id'] != 0:
                 questions = Question.query.filter(Question.category == quiz_category['id']).all()
-                question = random.choice(questions)
-            formatted_question = question.format()
-            picked_questions.append(formatted_question['id'])
-            return jsonify({
-                'success': True,
-                'question': formatted_question
-            })
+                if questions == []:
+                    abort(404)
+                else:
+                    question = random.choice(questions)
+                formatted_question = question.format()
+                picked_questions.append(formatted_question['id'])
+                return jsonify({
+                    'success': True,
+                    'question': formatted_question
+                })
 
         else:
             questions = Question.query.filter(~Question.id.in_(question for question in previous_questions))
             if quiz_category['id'] == 0:
                 questions = questions.all()
                 question = random.choice(questions)
-            else:
+            elif quiz_category['id'] != 0:
                 questions = questions.filter(Question.category == quiz_category['id']).all()
-                question = random.choice(questions)
-            formatted_question = question.format()
-            picked_questions.append(formatted_question['id'])
-            return jsonify({
-                'success': True,
-                'question': formatted_question
-            })
+                if questions == []:
+                    abort(404)
+                elif questions:
+                    question = random.choice(questions)
+                formatted_question = question.format()
+                picked_questions.append(formatted_question['id'])
+                return jsonify({
+                    'success': True,
+                    'question': formatted_question
+                })
 
 #-----------Error Handlers------------------------------------------------------
     @app.errorhandler(404)
@@ -291,5 +297,5 @@ def create_app(test_config=None):
         'error': 500,
         'message': "internal server error"
         }), 500
-        
+
     return app
