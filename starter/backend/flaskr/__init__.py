@@ -80,33 +80,35 @@ def create_app(test_config=None):
         if request.method == 'GET':
             selection = Question.query.order_by(Question.id).all()
             current_questions = paginate_questions(request, selection)
-            if len(selection) == 0:
+            if len(current_questions) == 0:
                 abort(404)
-            else:
+            elif len(current_questions) > 0:
                 return jsonify({
                     'success': True,
                     'questions' : current_questions,
-                    'total_questions' : len(selection),
+                    'total_questions' : len(current_questions),
                     'categories' : {category.id:category.type for category in categories},
                     'current_Category': None
                 })
         if request.method == 'POST':
-            search_term=request.get_json()['searchTerm']
-            search_term = "%{}%".format(search_term)
-            question = Question.query.filter(Question.question.ilike(search_term)).all()
-            current_questions = paginate_questions(request, question)
-            print(current_questions)
-            if question == 0:
-                abort(404)
+            if request.is_json:
+                search_term=request.get_json()['searchTerm']
+                search_term = "%{}%".format(search_term)
+                question = Question.query.filter(Question.question.ilike(search_term)).all()
+                current_questions = paginate_questions(request, question)
+                print(current_questions)
+                if question == 0:
+                    abort(404)
+                else:
+                    return jsonify({
+                        'success': True,
+                        'questions' : current_questions,
+                        'total_questions' : len(question),
+                        'categories' : {category.id:category.type for category in categories},
+                        'current_Category': None
+                    })
             else:
-                return jsonify({
-                    'success': True,
-                    'questions' : current_questions,
-                    'total_questions' : len(question),
-                    'categories' : {category.id:category.type for category in categories},
-                    'current_Category': None
-                })
-
+                abort(400)
 
     '''
     Endpoint to handle GET requests
@@ -136,7 +138,7 @@ def create_app(test_config=None):
         category = Category.query.get(id)
         questions = Question.query.filter(Question.category == id).all()
         paginated_questions = paginate_questions(request, questions)
-        if questions == 0:
+        if len(questions) == 0:
             abort(404)
         else:
             return jsonify({
@@ -156,7 +158,7 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     '''
-    @app.route('/questions', methods = ['POST'])
+    @app.route('/questions/create', methods = ['POST'])
     def create_question():
         body = request.get_json()
         question = body.get('question')
@@ -204,7 +206,8 @@ def create_app(test_config=None):
             finally:
                 db.session.close()
             return jsonify({
-                'success': True
+                'success': True,
+                'message': 'The following question {} \nhas been deleted'.format(question)
             })
 
         '''
@@ -261,6 +264,14 @@ def create_app(test_config=None):
                 })
 
 #-----------Error Handlers------------------------------------------------------
+    @app.errorhandler(400)
+    def not_found(error):
+        return jsonify({
+        'success': False,
+        'error': 400,
+        'message': "bad request"
+        }), 400
+
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
