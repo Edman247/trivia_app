@@ -39,7 +39,7 @@ def create_app(test_config=None):
     # `/categories/${id}/questions`
     # @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     # '''
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     '''
     after_request decorator to set Access-Control-Allow
