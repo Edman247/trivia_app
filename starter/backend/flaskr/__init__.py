@@ -203,7 +203,7 @@ def create_app(test_config=None):
 
     @app.route('/questions/<int:id>', methods=['DELETE'])
     def delete_question(id):
-        question = Question.query.filter(Question.id == id)
+        question = Question.query.get(id)
         if question is None:
             abort(404)
         else:
@@ -216,7 +216,7 @@ def create_app(test_config=None):
                 db.session.close()
             return jsonify({
                 'success': True,
-                'message': 'The following question {} \nhas been deleted'.format(question)
+                'message': 'The question  with ID: {} has been deleted'.format(question.id)
             })
 
         '''
